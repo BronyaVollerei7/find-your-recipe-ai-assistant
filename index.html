@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Your Recipe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-title">Find Your Recipe</span>
+    <div class="logo-dot"></div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('id',this)">ID</button>
+    <button class="lang-btn" onclick="setLang('en',this)">EN</button>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+</header>
+
+<main>
+  <div class="hero">
+    <h2 id="heroTitle">Masak apa hari ini,<br><em>chef?</em></h2>
+    <p id="heroSub">Ketik bahan yang ada — atau foto makananmu</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('text',this)" data-id="Ketik Bahan" data-en="Type Ingredients">Ketik Bahan</button>
+    <button class="tab-btn" onclick="switchTab('image',this)" data-id="Upload Foto" data-en="Upload Photo">Upload Foto</button>
+  </div>
+
+  <div class="panel active" id="panel-text">
+    <div class="chips">
+      <span class="chip" onclick="fillChip(this)" data-id="ayam & sayuran" data-en="chicken & veggies">ayam & sayuran</span>
+      <span class="chip" onclick="fillChip(this)" data-id="telur & keju" data-en="eggs & cheese">telur & keju</span>
+      <span class="chip" onclick="fillChip(this)" data-id="mie instan" data-en="instant noodles">mie instan</span>
+      <span class="chip" onclick="fillChip(this)" data-id="tahu tempe" data-en="tofu & tempeh">tahu tempe</span>
+      <span class="chip" onclick="fillChip(this)" data-id="ikan & tomat" data-en="fish & tomato">ikan & tomat</span>
+    </div>
+
+    <div class="chat-scroll" id="chatHistory">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">✦</div>
+        <p id="emptyTxt">Ceritakan bahan yang kamu punya<br>dan kami siapkan resepnya</p>
+      </div>
+    </div>
+
+    <div class="loading-overlay" id="chatLoading">
+      <div class="chef-loader">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <div class="orbit-dot"></div>
+        <div class="ring-center">✦</div>
+      </div>
+      <div class="loading-text">
+        <div class="loading-phrase" id="chatPhrase"></div>
+        <div class="loading-meta" id="chatMeta"></div>
+        <div class="tick-dots">
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <input type="text" id="messageInput" onkeydown="if(event.key==='Enter')sendMessage()" />
+      <button class="btn-primary" id="sendBtn" onclick="sendMessage()"></button>
+    </div>
+
+    <div class="pdf-bar" id="chatPdfBar">
+      <span class="pdf-label" id="pdfBarLabel"></span>
+      <button class="btn-pdf" id="chatPdfBtn" onclick="exportPdf('chat')">⬇ <span id="pdfBtnTxt">Export PDF</span></button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-image">
+    <div class="drop-zone" id="dropZone"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)">
+      <input type="file" id="imageFile" accept="image/*" onchange="handleFileSelect(event)" />
+      <div class="drop-icon">📸</div>
+      <p>
+        <strong id="dropStrong">Klik atau seret foto ke sini</strong><br>
+        <span id="dropSub">Foto makanan atau bahan — AI identifikasi & buat resepnya</span>
+      </p>
+    </div>
+
+    <div class="preview-wrap" id="previewWrap">
+      <img id="previewImg" src="" alt="Preview" />
+      <div class="preview-overlay"></div>
+      <button class="preview-clear" onclick="clearImage()">✕</button>
+    </div>
+
+    <div class="input-row" style="margin-bottom:13px">
+      <input type="text" id="imagePrompt" />
+      <button class="btn-primary" id="imgBtn" onclick="analyzeImage()"></button>
+    </div>
+
+    <div class="loading-overlay" id="imgLoading">
+      <div class="chef-loader">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <div class="orbit-dot"></div>
+        <div class="ring-center">✦</div>
+      </div>
+      <div class="loading-text">
+        <div class="loading-phrase" id="imgPhrase"></div>
+        <div class="loading-meta" id="imgMeta"></div>
+        <div class="tick-dots">
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+          <div class="tick-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card" id="imgResult">
+      <div class="result-stamp">
+        <div class="stamp-dot"></div>
+        <span id="resultStampTxt">Hasil Analisa Foto</span>
+      </div>
+      <div class="md" id="imgResultContent"></div>
+    </div>
+
+    <div class="pdf-bar" id="imgPdfBar">
+      <span class="pdf-label" id="imgPdfLabel"></span>
+      <button class="btn-pdf" id="imgPdfBtn" onclick="exportPdf('img')">⬇ Export PDF</button>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
