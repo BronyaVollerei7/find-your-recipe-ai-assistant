@@ -1,5 +1,6 @@
 let lang = 'id', isDark = true
 let lastChatReply = '', lastImgReply = ''
+let chatHistory = [] 
 
 const T = {
   id: {
@@ -142,11 +143,17 @@ async function sendMessage() {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, lang })
+      body: JSON.stringify({ message: msg, history: chatHistory, lang })
     })
     const data = await res.json()
     clearInterval(timer)
     lastChatReply = data.reply || data.error || ''
+
+    if (data.reply) {
+      chatHistory.push({ role: 'user', text: msg })
+      chatHistory.push({ role: 'model', text: data.reply })
+    }
+
     const aiRow = document.createElement('div')
     aiRow.className = 'msg-row ai'
     aiRow.innerHTML = `<div class="msg-label">${t('aiLabel')}</div><div class="bubble"><div class="md">${renderMD(lastChatReply || t('errMsg'))}</div></div>`
@@ -376,7 +383,6 @@ function buildPdf(r) {
     y += rowH
   })
 
-
   if (r.tips && r.tips.length) {
     y += 6; checkPage(14)
     setFont('bold', 8, GOLD)
@@ -401,6 +407,5 @@ function buildPdf(r) {
 
   doc.save(`recipe-${Date.now()}.pdf`)
 }
-
 
 applyStrings()
