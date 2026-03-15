@@ -158,10 +158,4 @@ prompt: "optional custom prompt"
 
 ---
 
-## 📄 License
-
-MIT
-
----
-
 *Created with stress & coffee ☕*
